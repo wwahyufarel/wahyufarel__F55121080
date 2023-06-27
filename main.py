@@ -1,79 +1,83 @@
 import time
+import itertools
 
 
-def bubble_sort(arr):
-    n = len(arr)
-    start_time = time.time()
+def tsp(graph, start):
+    n = len(graph)
+    all_nodes = set(range(n))
+    all_paths = []
 
-    for i in range(n - 1):
-        for j in range(n - i - 1):
-            if arr[j] > arr[j + 1]:
-                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+    def backtrack(curr_node, visited, path, cost):
+        visited.add(curr_node)
+        path.append(curr_node)
 
-    end_time = time.time()
-    execution_time = end_time - start_time
+        if len(visited) == n:
+            all_paths.append((path + [start], cost + graph[curr_node][start]))
+        else:
+            for next_node in all_nodes - visited:
+                backtrack(next_node, visited.copy(), path.copy(), cost + graph[curr_node][next_node])
 
-    return arr, execution_time
+        visited.remove(curr_node)
+        path.pop()
 
+    backtrack(start, set(), [], 0)
 
-def insertion_sort(arr):
-    n = len(arr)
-    start_time = time.time()
+    all_paths.sort(key=lambda x: x[1])
+    shortest_path = all_paths[0]
 
-    for i in range(1, n):
-        key = arr[i]
-        j = i - 1
-
-        while j >= 0 and arr[j] > key:
-            arr[j + 1] = arr[j]
-            j -= 1
-
-        arr[j + 1] = key
-
-    end_time = time.time()
-    execution_time = end_time - start_time
-
-    return arr, execution_time
+    return shortest_path
 
 
-def print_iterations(arr, iterations=5):
+def print_iterations(paths, iterations=5):
     print("Iterasi Pertama:")
-    for i in range(iterations):
-        print(arr[i], end=" ")
+    for node in paths[0][0]:
+        print(node, end=" ")
     print("\n")
 
     print("Iterasi Terakhir:")
-    for i in range(len(arr) - iterations, len(arr)):
-        print(arr[i], end=" ")
+    for node in paths[-1][0]:
+        print(node, end=" ")
     print("\n")
 
 
 def print_analysis():
-    print("Worst Case: Bubble Sort and Insertion Sort memiliki kompleksitas waktu O(n^2).")
-    print("Best Case (Bubble Sort): Jika array sudah terurut secara menaik, kompleksitas waktu menjadi O(n).")
-    print("Best Case (Insertion Sort): Jika array sudah terurut secara menurun, kompleksitas waktu menjadi O(n).")
-    print("Average Case: Bubble Sort dan Insertion Sort memiliki kompleksitas waktu O(n^2).\n")
+    print("Worst Case: Algoritma TSP memiliki kompleksitas waktu O(n!).")
+    print("Best Case: Tidak ada. Algoritma TSP memerlukan pencarian di semua kemungkinan rute.")
+    print(
+        "Average Case: Algoritma TSP memiliki kompleksitas waktu yang sangat tinggi dan sulit untuk ditentukan secara pasti.\n")
 
 
 def main():
-    arr = [12, 99, 62, 15, 20, 95, 39, 48, 3, 24, 8, 43, 74, 19, 97, 33, 49, 68, 55, 33,
-           90, 90, 7, 26, 85, 46, 39, 40, 9, 36, 60, 64, 89, 31, 25, 71, 21, 23, 63, 84,
-           32, 5, 3, 44, 21, 10, 21, 17, 50, 2, 36, 53, 79, 54, 19, 88, 1, 32, 31, 15, 6,
-           3, 1, 40, 22, 43, 18, 1, 77, 9, 59, 40, 7, 41, 81]
+    graph = [
+        [0, 2, 9, 10],
+        [1, 0, 6, 4],
+        [15, 7, 0, 8],
+        [6, 3, 12, 0]
+    ]
+    start = 0
 
-    print("Sebelum pengurutan:")
-    print(arr)
+    print("Grafik:")
+    for row in graph:
+        print(row)
     print("\n")
 
-    choice = input("Pilih metode pengurutan (bubble/insertion): ")
+    print("Perhitungan jalur terpendek dengan algoritma TSP...\n")
 
-    if choice == "bubble":
-        sorted_arr, execution_time = bubble_sort(arr.copy())
-    elif choice == "insertion":
-        sorted_arr, execution_time = insertion_sort(arr.copy())
-    else:
-        print("Pilihan tidak valid.")
-        return
+    start_time = time.time()
+    shortest_path = tsp(graph, start)
+    end_time = time.time()
 
-    print("Setelah pengurutan:")
-    print(sorted)
+    print("Hasil Akhir (Jalur Terpendek):")
+    for node in shortest_path[0]:
+        print(node, end=" ")
+    print("\n")
+
+    print("Waktu Komputasi Perhitungan Path:", end_time - start_time, "detik\n")
+
+    print_iterations(shortest_path[0])
+
+    print_analysis()
+
+
+if __name__ == "__main__":
+    main()
